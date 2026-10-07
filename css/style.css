@@ -64,11 +64,12 @@ button:focus-visible { outline: 4px solid var(--cyan); outline-offset: 3px; }
 }
 .brand-logo {
   display: block;
-  width: min(44vw, 190px);
-  max-width: 54%;
+  width: min(31vw, 112px);
+  max-width: 112px;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(255,63,143,.20));
+  flex: 0 0 auto;
+  filter: drop-shadow(0 0 8px rgba(255,63,143,.16));
 }
 .line-chip {
   background: var(--green);
