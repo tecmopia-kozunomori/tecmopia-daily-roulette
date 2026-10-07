@@ -62,11 +62,13 @@ button:focus-visible { outline: 4px solid var(--cyan); outline-offset: 3px; }
   position: relative;
   z-index: 2;
 }
-.brand-mark {
-  font-weight: 1000;
-  letter-spacing: .08em;
-  font-size: 18px;
-  text-shadow: 0 0 18px rgba(255,255,255,.22);
+.brand-logo {
+  display: block;
+  width: min(44vw, 190px);
+  max-width: 54%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(255,63,143,.20));
 }
 .line-chip {
   background: var(--green);
@@ -195,7 +197,7 @@ h1 span { color: var(--yellow); }
   position: absolute;
   inset: 50% auto auto 50%;
   transform: translate(-50%,-50%);
-  width: 30%;
+  width: 27%;
   aspect-ratio: 1;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 28%, #fff, #ffe9f5 38%, #ff60a4 39%, #cc246d 100%);
@@ -225,6 +227,11 @@ h1 span { color: var(--yellow); }
   transform: rotate(var(--angle)) translateY(clamp(-130px, -28vw, -80px)) rotate(calc(-1 * var(--angle)));
   transform-origin: 50% 50%;
   z-index: 2;
+}
+.segment-label-inner {
+  display: block;
+  transform: rotate(var(--counter-rotation, 0deg));
+  transform-origin: 50% 50%;
 }
 .segment-label .seg-icon { display: block; font-size: clamp(14px, 4vw, 22px); filter: drop-shadow(0 1px 0 rgba(255,255,255,.4)); }
 .pointer-wrap {

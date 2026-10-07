@@ -59,7 +59,7 @@
       const node = document.createElement('div');
       node.className = `segment-label seg-${seg.id}`;
       node.style.setProperty('--angle', `${angle}deg`);
-      node.innerHTML = `<span class="seg-icon">${seg.icon}</span><span>${seg.short}</span>`;
+      node.innerHTML = `<span class="segment-label-inner"><span class="seg-icon">${seg.icon}</span><span>${seg.short}</span></span>`;
       holder.appendChild(node);
     });
   }
@@ -74,6 +74,18 @@
 
   function normalizeDeg(value) {
     return ((value % 360) + 360) % 360;
+  }
+
+  function signedDeg(value) {
+    const deg = normalizeDeg(value);
+    return deg > 180 ? deg - 360 : deg;
+  }
+
+  function setLabelsUpright(rotation) {
+    const counter = -signedDeg(rotation);
+    document.querySelectorAll('.segment-label-inner').forEach(node => {
+      node.style.setProperty('--counter-rotation', `${counter}deg`);
+    });
   }
 
   function playSpinSound(durationMs) {
@@ -128,9 +140,8 @@
     const index = selectedIndexFor(prizeId);
     const segmentAngle = 360 / segmentData.length;
     const center = index * segmentAngle + segmentAngle / 2;
-    const jitter = (Math.random() - 0.5) * segmentAngle * 0.35;
     const current = normalizeDeg(currentRotation);
-    const targetMod = normalizeDeg(-center + jitter);
+    const targetMod = normalizeDeg(-center);
     const delta = normalizeDeg(targetMod - current);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const turns = reduceMotion ? 1 : 7;
@@ -140,7 +151,12 @@
     wheel.style.transitionDuration = `${duration}ms`;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
     playSpinSound(duration);
-    return new Promise(resolve => setTimeout(resolve, duration + 120));
+    return new Promise(resolve => {
+      setTimeout(() => {
+        setLabelsUpright(currentRotation);
+        resolve();
+      }, duration + 120);
+    });
   }
 
   function confetti() {
@@ -264,6 +280,7 @@
   async function boot() {
     $('todayLabel').textContent = formatToday();
     buildSegments();
+    setLabelsUpright(currentRotation);
 
     try {
       const info = await api.init();
