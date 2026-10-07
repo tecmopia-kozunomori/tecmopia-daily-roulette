@@ -83,17 +83,18 @@ button:focus-visible { outline: 4px solid var(--cyan); outline-offset: 3px; }
 
 .hero {
   display: grid;
-  grid-template-columns: 118px minmax(0,1fr);
+  grid-template-columns: 126px minmax(0,1fr);
   align-items: end;
   gap: 8px;
   padding: 18px 2px 6px;
   position: relative;
   z-index: 2;
 }
-.tekuma {
-  width: 126px;
+.hero-tekuma {
+  width: 122px;
   max-width: 100%;
   align-self: end;
+  justify-self: start;
   filter: drop-shadow(0 10px 12px rgba(0,0,0,.28));
 }
 .hero-copy { min-width: 0; }
@@ -338,7 +339,41 @@ h1 span { color: var(--yellow); }
 .error-icon { background:#ff5677;color:#fff; }
 .done-card h2,.error-card h2 { margin:0 0 7px; font-size:23px; }
 .done-card p,.error-card p { margin:0; color:#eadcf1; line-height:1.65; font-size:13px; }
-.done-tekuma { width:130px; margin:17px auto 0; filter:drop-shadow(0 9px 9px rgba(0,0,0,.25)); }
+.done-tekuma-wrap { position: relative; width: min(84%, 290px); margin: 18px auto 0; }
+.done-speech {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: #fff36a;
+  color: #4a2147;
+  font-size: 18px;
+  font-weight: 1000;
+  box-shadow: 0 8px 18px rgba(0,0,0,.22);
+}
+.done-speech::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  background: #fff36a;
+  clip-path: polygon(0 0, 100% 0, 20% 100%);
+}
+.done-tekuma-peek {
+  display: block;
+  width: 100%;
+  max-width: 290px;
+  margin: 0 auto;
+  filter: drop-shadow(0 10px 14px rgba(255,0,0,.22));
+}
 .secondary-button { border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.12); color:#fff; border-radius:12px; padding:12px 15px; font-weight:900; cursor:pointer; }
 .error-card .secondary-button { margin-top:16px; }
 
@@ -360,8 +395,8 @@ h1 span { color: var(--yellow); }
 
 @media (max-width: 370px) {
   .app-shell { padding-left:11px; padding-right:11px; }
-  .hero { grid-template-columns:96px minmax(0,1fr); }
-  .tekuma { width:104px; }
+  .hero { grid-template-columns:102px minmax(0,1fr); }
+  .hero-tekuma { width:98px; }
   .wheel { border-width:8px; }
   .segment-label { width:66px; margin-left:-33px; }
   .prize-pill b { font-size:9px; }
