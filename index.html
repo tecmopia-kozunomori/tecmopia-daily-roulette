@@ -6,19 +6,19 @@
   <meta name="theme-color" content="#24113f">
   <title>テクモピア毎日ルーレット</title>
   <meta name="description" content="1日1回、ハズレなし。テクモピア毎日ルーレット！">
-  <link rel="stylesheet" href="./css/style.css?v=5">
+  <link rel="stylesheet" href="./css/style.css?v=6">
 </head>
 <body>
   <main class="app-shell" id="app">
     <div class="sparkles" aria-hidden="true"></div>
 
     <header class="brand-header">
-      <img class="brand-logo" src="./assets/tecmopia-logo.png?v=5" alt="TECMOPIA">
+      <img class="brand-logo" src="./assets/tecmopia-logo.png?v=6" alt="TECMOPIA">
       <div class="line-chip">LINE限定</div>
     </header>
 
     <section class="hero" aria-labelledby="pageTitle">
-      <img class="hero-tekuma" src="./assets/hero-tekuma.png?v=5" alt="テクマくん">
+      <img class="hero-tekuma" src="./assets/hero-tekuma.png?v=6" alt="テクマくん">
       <div class="hero-copy">
         <p class="eyebrow">1日1回・ハズレなし！</p>
         <h1 id="pageTitle">テクモピア<br><span>毎日ルーレット</span></h1>
@@ -30,6 +30,18 @@
       <span class="status-dot" aria-hidden="true"></span>
       <span id="connectionText">LINEと接続しています…</span>
       <span class="demo-badge" id="demoBadge" hidden>デモ</span>
+    </section>
+
+    <section id="loadingView" class="view loading-view" aria-live="polite" aria-busy="true">
+      <div class="loading-card">
+        <div class="roulette-loader" aria-hidden="true">
+          <div class="roulette-loader-core">★</div>
+        </div>
+        <h2>ルーレットを準備しています…</h2>
+        <p id="loadingMessage">LINE認証を確認しています</p>
+        <div class="loading-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+        <small>通信状況により数秒かかることがあります。</small>
+      </div>
     </section>
 
     <section id="wheelView" class="view" hidden>
@@ -105,7 +117,7 @@
         <p>ご利用ありがとうございました！<br>また明日、ルーレットに挑戦してね。</p>
         <div class="done-tekuma-wrap">
           <div class="done-speech">またね！</div>
-          <img class="done-tekuma-peek" src="./assets/done-tekuma-peek.png?v=5" alt="テクマくん">
+          <img class="done-tekuma-peek" src="./assets/done-tekuma-peek.png?v=6" alt="テクマくん">
         </div>
       </div>
     </section>
@@ -140,8 +152,8 @@
   </main>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="./js/config.js?v=5"></script>
-  <script src="./js/api.js?v=5"></script>
-  <script src="./js/app.js?v=5"></script>
+  <script src="./js/config.js?v=6"></script>
+  <script src="./js/api.js?v=6"></script>
+  <script src="./js/app.js?v=6"></script>
 </body>
 </html>

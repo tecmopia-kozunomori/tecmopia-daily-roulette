@@ -5,7 +5,7 @@
   const api = new window.RouletteApi(cfg);
 
   const $ = (id) => document.getElementById(id);
-  const views = ['wheelView', 'resultView', 'doneView', 'errorView'];
+  const views = ['loadingView', 'wheelView', 'resultView', 'doneView', 'errorView'];
   const wheel = $('wheel');
   const spinButton = $('spinButton');
   const redeemButton = $('redeemButton');
@@ -14,6 +14,7 @@
   let activeClaim = null;
   let spinning = false;
   let clockTimer = null;
+  let loadingTimer = null;
 
   const segmentData = [
     { id: 'medal10', short: '10枚', icon: '🪙' },
@@ -281,14 +282,26 @@
     $('todayLabel').textContent = formatToday();
     buildSegments();
     setLabelsUpright(currentRotation);
+    showView('loadingView');
+    $('loadingMessage').textContent = 'LINE認証を確認しています';
+    setConnection('LINEと接続しています…', 'ok');
+
+    clearTimeout(loadingTimer);
+    loadingTimer = setTimeout(() => {
+      if (!$('loadingView').hidden) {
+        $('loadingMessage').textContent = 'もう少しお待ちください…';
+      }
+    }, 4500);
 
     try {
       const info = await api.init();
       $('demoBadge').hidden = !info.demo;
       const name = info.profile && info.profile.displayName ? `${info.profile.displayName}さん、` : '';
       setConnection(info.demo ? 'デモモードで動作中' : `${name}LINE認証OK！`, 'ok');
+      $('loadingMessage').textContent = '本日の利用状況を確認しています';
 
       const status = await api.status();
+      clearTimeout(loadingTimer);
       if (status.state === 'available') {
         showView('wheelView');
         spinButton.disabled = false;
@@ -301,6 +314,7 @@
         throw new Error('利用状態を確認できませんでした。');
       }
     } catch (err) {
+      clearTimeout(loadingTimer);
       showError(err);
     }
   }
