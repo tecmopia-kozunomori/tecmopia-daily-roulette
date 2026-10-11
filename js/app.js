@@ -15,6 +15,7 @@
   let spinning = false;
   let clockTimer = null;
   let loadingTimer = null;
+  let pendingSpin = null;
 
   const segmentData = [
     { id: 'medal10', short: '10枚', icon: '🪙' },
@@ -30,9 +31,9 @@
   ];
 
   const prizeUi = {
-    medal10: { icon: '🪙', defaultName: 'メダル10枚', thumb: './assets/prize-medal10.webp?v=7' },
-    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料', thumb: './assets/prize-free1.webp?v=7' },
-    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量', thumb: './assets/prize-extra1.webp?v=7' }
+    medal10: { icon: '🪙', defaultName: 'メダル10枚', thumb: './assets/prize-medal10.webp?v=8' },
+    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料', thumb: './assets/prize-free1.webp?v=8' },
+    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量', thumb: './assets/prize-extra1.webp?v=8' }
   };
 
   function showView(id) {
@@ -145,8 +146,8 @@
     const targetMod = normalizeDeg(-center);
     const delta = normalizeDeg(targetMod - current);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const turns = reduceMotion ? 1 : 7;
-    const duration = reduceMotion ? 900 : 4900;
+    const turns = reduceMotion ? 1 : 4;
+    const duration = reduceMotion ? 800 : 3200;
 
     currentRotation += turns * 360 + delta;
     wheel.style.transitionDuration = `${duration}ms`;
@@ -158,6 +159,33 @@
         resolve();
       }, duration + 120);
     });
+  }
+
+  function startPendingSpin() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || !wheel.animate) return null;
+
+    const baseRotation = currentRotation;
+    const duration = 680;
+    const startedAt = performance.now();
+    const animation = wheel.animate(
+      [
+        { transform: `rotate(${baseRotation}deg)` },
+        { transform: `rotate(${baseRotation + 360}deg)` }
+      ],
+      { duration, iterations: Infinity, easing: 'linear' }
+    );
+    return { animation, baseRotation, duration, startedAt };
+  }
+
+  function stopPendingSpin(pending) {
+    if (!pending) return;
+    const elapsed = Math.max(0, performance.now() - pending.startedAt);
+    currentRotation = pending.baseRotation + (elapsed / pending.duration) * 360;
+    pending.animation.cancel();
+    wheel.style.transitionDuration = '0ms';
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    void wheel.offsetWidth;
   }
 
   function confetti() {
@@ -187,7 +215,7 @@
     activeClaim = data.claimId;
     $('resultIcon').textContent = ui.icon;
     $('resultPrize').textContent = prize.name || ui.defaultName;
-    $('resultThumb').src = ui.thumb || './assets/prize-medal10.webp?v=7';
+    $('resultThumb').src = ui.thumb || './assets/prize-medal10.webp?v=8';
     $('resultThumb').alt = prize.name || ui.defaultName;
     $('claimLabel').textContent = `ID: ${(data.claimId || '--------').slice(0, 12)}`;
     $('expiryLabel').textContent = `${formatToday()} 23:59まで`;
@@ -221,8 +249,12 @@
     spinButton.querySelector('.spin-main').textContent = 'GO!';
 
     try {
-      // 抽選結果は必ずサーバー側で先に確定。
+      // 通信を待っている間も即座にルーレットを回し、無反応に見せない。
+      pendingSpin = startPendingSpin();
       const result = await api.spin();
+      stopPendingSpin(pendingSpin);
+      pendingSpin = null;
+
       if (result.state === 'redeemed') {
         showView('doneView');
         return;
@@ -233,6 +265,8 @@
       await spinTo(result.prize.id);
       showResult(result, true);
     } catch (err) {
+      stopPendingSpin(pendingSpin);
+      pendingSpin = null;
       showError(err);
     } finally {
       spinning = false;
@@ -293,7 +327,7 @@
       if (!$('loadingView').hidden) {
         $('loadingMessage').textContent = 'もう少しお待ちください…';
       }
-    }, 4500);
+    }, 3000);
 
     try {
       const info = await api.init();

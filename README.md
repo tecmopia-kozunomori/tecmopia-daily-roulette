@@ -25,7 +25,7 @@
 │  ├─ config.js
 │  ├─ api.js
 │  └─ app.js
-├─ assets/tekuma.png
+├─ assets/hero-tekuma.webp / done-tekuma-peek.webp
 └─ gas/
    ├─ Code.gs
    └─ appsscript.json
