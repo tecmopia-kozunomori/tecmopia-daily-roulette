@@ -309,15 +309,56 @@ h1 span { color: var(--yellow); }
 .pointer-star { width: 42px; height: 42px; display:grid; place-items:center; border-radius:50%; background:#fff; color:var(--pink); font-size:23px; border:4px solid var(--yellow); }
 .pointer { width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:28px solid #fff; margin-top:-3px; }
 
-.prize-strip {
+.prize-guide {
+  margin: 6px auto 14px;
+  width: min(100%, 470px);
+}
+.prize-guide-title {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 1000;
+  color: #fff8a7;
+  letter-spacing: .02em;
+}
+.prize-grid {
   display: grid;
   grid-template-columns: repeat(3,1fr);
-  gap: 7px;
-  margin: 2px 0 13px;
+  gap: 8px;
 }
-.prize-pill { min-width:0; text-align:center; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.14); border-radius:13px; padding:8px 4px; font-size:10px; }
-.prize-pill span { display:block; font-size:19px; margin-bottom:2px; }
-.prize-pill b { display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prize-card {
+  min-width: 0;
+  text-align: center;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 16px;
+  padding: 10px 8px 9px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.prize-card img {
+  display: block;
+  width: 100%;
+  max-width: 120px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  margin: 0 auto 6px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.20);
+}
+.prize-card h3 {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 1000;
+  color: #fff;
+}
+.prize-card p {
+  margin: 4px 0 0;
+  font-size: 9px;
+  color: #ebd8f7;
+  font-weight: 800;
+}
+.prize-card-medal img { padding: 6px; }
 
 .spin-button {
   display: grid;
@@ -377,7 +418,8 @@ h1 span { color: var(--yellow); }
 .ticket-pop { animation:ticketPop .75s cubic-bezier(.2,1.2,.3,1); }
 @keyframes ticketPop { 0%{transform:scale(.78) rotate(-3deg);opacity:.2} 70%{transform:scale(1.04) rotate(1deg)} 100%{transform:scale(1);opacity:1} }
 .ticket-topline { position:relative; z-index:1; font-size:10px; letter-spacing:.14em; font-weight:1000; color:#a73170; }
-.ticket-prize-icon { position:relative; z-index:1; font-size:58px; line-height:1; margin:15px 0 4px; }
+.ticket-thumb { position:relative; z-index:1; display:block; width:min(86%, 260px); max-width:260px; margin:14px auto 10px; border-radius:18px; object-fit:contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,.16)); }
+.ticket-prize-icon { position:relative; z-index:1; font-size:40px; line-height:1; margin:2px 0 4px; }
 .ticket-prize { position:relative; z-index:1; font-size:clamp(26px,8vw,38px); line-height:1.12; font-weight:1000; color:#4b1249; }
 .ticket-valid { position:relative; z-index:1; display:grid; gap:2px; width:fit-content; margin:15px auto 9px; padding:7px 14px; border-radius:999px; background:#fff2a4; border:2px solid #ffd400; }
 .ticket-valid span { font-size:11px; font-weight:1000; color:#c23d28; }
@@ -458,7 +500,10 @@ h1 span { color: var(--yellow); }
   .hero-tekuma { width:98px; }
   .wheel { border-width:8px; }
   .segment-label { width:66px; margin-left:-33px; }
-  .prize-pill b { font-size:9px; }
+  .prize-grid { gap: 6px; }
+  .prize-card { padding: 8px 6px; }
+  .prize-card h3 { font-size: 10px; }
+  .prize-card p { font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

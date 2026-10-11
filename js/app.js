@@ -30,9 +30,9 @@
   ];
 
   const prizeUi = {
-    medal10: { icon: '🪙', defaultName: 'メダル10枚' },
-    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料' },
-    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量' }
+    medal10: { icon: '🪙', defaultName: 'メダル10枚', thumb: './assets/prize-medal10.webp?v=7' },
+    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料', thumb: './assets/prize-free1.webp?v=7' },
+    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量', thumb: './assets/prize-extra1.webp?v=7' }
   };
 
   function showView(id) {
@@ -187,6 +187,8 @@
     activeClaim = data.claimId;
     $('resultIcon').textContent = ui.icon;
     $('resultPrize').textContent = prize.name || ui.defaultName;
+    $('resultThumb').src = ui.thumb || './assets/prize-medal10.webp?v=7';
+    $('resultThumb').alt = prize.name || ui.defaultName;
     $('claimLabel').textContent = `ID: ${(data.claimId || '--------').slice(0, 12)}`;
     $('expiryLabel').textContent = `${formatToday()} 23:59まで`;
     showView('resultView');

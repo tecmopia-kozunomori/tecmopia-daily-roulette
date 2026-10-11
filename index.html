@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#24113f">
   <title>テクモピア毎日ルーレット</title>
   <meta name="description" content="1日1回、ハズレなし。テクモピア毎日ルーレット！">
-  <link rel="stylesheet" href="./css/style.css?v=6">
+  <link rel="stylesheet" href="./css/style.css?v=7">
 </head>
 <body>
   <main class="app-shell" id="app">
@@ -65,11 +65,26 @@
         </div>
       </div>
 
-      <div class="prize-strip" aria-label="当たる特典">
-        <div class="prize-pill"><span>🎟️</span><b>1PLAY無料</b></div>
-        <div class="prize-pill"><span>🪙</span><b>メダル10枚</b></div>
-        <div class="prize-pill"><span>➕</span><b>1PLAY増量</b></div>
-      </div>
+      <section class="prize-guide" aria-label="当たり一覧">
+        <p class="prize-guide-title">ハズレなし！この3つのどれかが当たる！</p>
+        <div class="prize-grid">
+          <article class="prize-card prize-card-free">
+            <img src="./assets/prize-free1.webp?v=7" alt="クレーンゲーム 1PLAY無料クーポン">
+            <h3>クレーンゲーム<br>1PLAY無料</h3>
+            <p>本日のみ有効</p>
+          </article>
+          <article class="prize-card prize-card-medal">
+            <img src="./assets/prize-medal10.webp?v=7" alt="メダル10枚">
+            <h3>メダル10枚</h3>
+            <p>その場でプレゼント</p>
+          </article>
+          <article class="prize-card prize-card-extra">
+            <img src="./assets/prize-extra1.webp?v=7" alt="クレーンゲーム 1PLAY増量クーポン">
+            <h3>クレーンゲーム<br>1PLAY増量</h3>
+            <p>本日のみ有効</p>
+          </article>
+        </div>
+      </section>
 
       <button class="spin-button" id="spinButton" type="button" disabled>
         <span class="spin-small">今日の運だめし！</span>
@@ -85,6 +100,7 @@
 
       <div class="ticket" id="ticket">
         <div class="ticket-topline">TECMOPIA DAILY ROULETTE</div>
+        <img class="ticket-thumb" id="resultThumb" src="./assets/prize-medal10.webp?v=7" alt="当選特典画像">
         <div class="ticket-prize-icon" id="resultIcon">🪙</div>
         <div class="ticket-prize" id="resultPrize">メダル10枚</div>
         <div class="ticket-valid">
@@ -152,8 +168,8 @@
   </main>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="./js/config.js?v=6"></script>
-  <script src="./js/api.js?v=6"></script>
-  <script src="./js/app.js?v=6"></script>
+  <script src="./js/config.js?v=7"></script>
+  <script src="./js/api.js?v=7"></script>
+  <script src="./js/app.js?v=7"></script>
 </body>
 </html>
