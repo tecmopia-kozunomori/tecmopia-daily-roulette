@@ -67,6 +67,26 @@
       node.innerHTML = `<span class="segment-label-inner"><span class="seg-icon">${seg.icon}</span><span>${seg.short}</span></span>`;
       holder.appendChild(node);
     });
+    layoutSegments();
+  }
+
+  // 画面幅(vw)ではなく「実際に表示されているルーレット直径」を基準に配置する。
+  // これによりiPhone/Android/タブレットで特典名の位置が変わりにくくなる。
+  function layoutSegments() {
+    const size = wheel.clientWidth;
+    if (!size) return;
+
+    const radius = Math.round(size * 0.345);
+    const width = Math.round(Math.max(62, Math.min(82, size * 0.22)));
+    const font = Math.max(9.5, Math.min(11.5, size * 0.0305));
+    const icon = Math.round(Math.max(16, Math.min(22, size * 0.056)));
+    const height = Math.round(Math.max(30, Math.min(38, size * 0.095)));
+
+    wheel.style.setProperty('--label-radius', `${radius}px`);
+    wheel.style.setProperty('--label-width', `${width}px`);
+    wheel.style.setProperty('--label-font', `${font}px`);
+    wheel.style.setProperty('--label-icon', `${icon}px`);
+    wheel.style.setProperty('--label-height', `${height}px`);
   }
 
   function selectedIndexFor(prizeId) {
@@ -355,6 +375,10 @@
       clearTimeout(loadingTimer);
       if (status.state === 'available') {
         showView('wheelView');
+        requestAnimationFrame(() => {
+          layoutSegments();
+          setLabelsUpright(currentRotation);
+        });
         spinButton.disabled = false;
       } else if (status.state === 'won') {
         showResult(status, false);
@@ -369,6 +393,19 @@
       showError(err);
     }
   }
+
+  if ('ResizeObserver' in window) {
+    const wheelResizeObserver = new ResizeObserver(() => {
+      if (!$('wheelView').hidden) layoutSegments();
+    });
+    wheelResizeObserver.observe(wheel);
+  } else {
+    window.addEventListener('resize', layoutSegments, { passive: true });
+  }
+
+  window.addEventListener('orientationchange', () => {
+    setTimeout(layoutSegments, 120);
+  });
 
   spinButton.addEventListener('click', onSpin);
   redeemButton.addEventListener('click', openConfirm);
