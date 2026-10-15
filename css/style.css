@@ -359,6 +359,18 @@ h1 span { color: var(--yellow); }
   font-weight: 800;
 }
 .prize-card-medal img { padding: 6px; }
+.prize-grid-four {
+  grid-template-columns: repeat(2,1fr);
+}
+.prize-card-lose img { padding: 6px; }
+.lose-note {
+  margin: 12px auto 0;
+  text-align: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 14px;
+}
+
 
 .spin-button {
   display: grid;
@@ -501,6 +513,7 @@ h1 span { color: var(--yellow); }
   .wheel { border-width:8px; }
   .segment-label { width:66px; margin-left:-33px; }
   .prize-grid { gap: 6px; }
+  .prize-grid-four { grid-template-columns: repeat(2,1fr); }
   .prize-card { padding: 8px 6px; }
   .prize-card h3 { font-size: 10px; }
   .prize-card p { font-size: 8px; }

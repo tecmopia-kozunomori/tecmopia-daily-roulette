@@ -1,6 +1,6 @@
 # テクマくん 毎日ルーレット
 
-テクモピア公津の杜店向けの、LINE LIFF + GitHub Pages + Google Apps Script 構成の「1日1回・ハズレなし」ルーレットです。
+テクモピア公津の杜店向けの、LINE LIFF + GitHub Pages + Google Apps Script 構成の「1日1回・4種類の結果」ルーレットです。
 
 ## 初期仕様
 

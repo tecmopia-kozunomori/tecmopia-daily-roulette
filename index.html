@@ -5,27 +5,27 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#24113f">
   <title>テクモピア毎日ルーレット</title>
-  <meta name="description" content="1日1回、ハズレなし。テクモピア毎日ルーレット！">
+  <meta name="description" content="1日1回チャレンジできるテクモピア毎日ルーレット！">
   <link rel="preconnect" href="https://static.line-scdn.net">
   <link rel="preconnect" href="https://script.google.com">
   <link rel="preconnect" href="https://script.googleusercontent.com">
-  <link rel="stylesheet" href="./css/style.css?v=8">
+  <link rel="stylesheet" href="./css/style.css?v=9">
 </head>
 <body>
   <main class="app-shell" id="app">
     <div class="sparkles" aria-hidden="true"></div>
 
     <header class="brand-header">
-      <img class="brand-logo" src="./assets/tecmopia-logo.png?v=8" alt="TECMOPIA">
+      <img class="brand-logo" src="./assets/tecmopia-logo.png?v=9" alt="TECMOPIA">
       <div class="line-chip">LINE限定</div>
     </header>
 
     <section class="hero" aria-labelledby="pageTitle">
-      <img class="hero-tekuma" src="./assets/hero-tekuma.webp?v=8" alt="テクマくん">
+      <img class="hero-tekuma" src="./assets/hero-tekuma.webp?v=9" alt="テクマくん">
       <div class="hero-copy">
-        <p class="eyebrow">1日1回・ハズレなし！</p>
+        <p class="eyebrow">1日1回チャレンジ！</p>
         <h1 id="pageTitle">テクモピア<br><span>毎日ルーレット</span></h1>
-        <p class="hero-note">今日使える特典が必ずどれか当たる！</p>
+        <p class="hero-note">今日の運だめしにチャレンジ！</p>
       </div>
     </section>
 
@@ -69,22 +69,27 @@
       </div>
 
       <section class="prize-guide" aria-label="当たり一覧">
-        <p class="prize-guide-title">ハズレなし！この3つのどれかが当たる！</p>
-        <div class="prize-grid">
+        <p class="prize-guide-title">結果はこの4種類！</p>
+        <div class="prize-grid prize-grid-four">
           <article class="prize-card prize-card-free">
-            <img src="./assets/prize-free1.webp?v=8" alt="クレーンゲーム 1PLAY無料クーポン">
+            <img src="./assets/prize-free1.webp?v=9" alt="クレーンゲーム 1PLAY無料クーポン">
             <h3>クレーンゲーム<br>1PLAY無料</h3>
             <p>本日のみ有効</p>
           </article>
           <article class="prize-card prize-card-medal">
-            <img src="./assets/prize-medal10.webp?v=8" alt="メダル10枚">
+            <img src="./assets/prize-medal10.webp?v=9" alt="メダル10枚">
             <h3>メダル10枚</h3>
-            <p>本日のみ有効</p>
+            <p>その場でプレゼント</p>
           </article>
           <article class="prize-card prize-card-extra">
-            <img src="./assets/prize-extra1.webp?v=8" alt="クレーンゲーム 1PLAY増量クーポン">
+            <img src="./assets/prize-extra1.webp?v=9" alt="クレーンゲーム 1PLAY増量クーポン">
             <h3>クレーンゲーム<br>1PLAY増量</h3>
             <p>本日のみ有効</p>
+          </article>
+          <article class="prize-card prize-card-lose">
+            <img src="./assets/prize-lose.webp?v=9" alt="ハズレ また明日チャレンジ">
+            <h3>ハズレ</h3>
+            <p>また明日チャレンジ！</p>
           </article>
         </div>
       </section>
@@ -98,16 +103,16 @@
 
     <section id="resultView" class="view" hidden aria-live="polite">
       <div class="result-burst" aria-hidden="true">★</div>
-      <p class="result-kicker">🎉 おめでとう！ 🎉</p>
-      <h2>本日の当たりは…</h2>
+      <p class="result-kicker" id="resultKicker">🎉 おめでとう！ 🎉</p>
+      <h2 id="resultTitle">本日の当たりは…</h2>
 
       <div class="ticket" id="ticket">
         <div class="ticket-topline">TECMOPIA DAILY ROULETTE</div>
-        <img class="ticket-thumb" id="resultThumb" src="./assets/prize-medal10.webp?v=8" alt="当選特典画像">
+        <img class="ticket-thumb" id="resultThumb" src="./assets/prize-medal10.webp?v=9" alt="結果画像">
         <div class="ticket-prize-icon" id="resultIcon">🪙</div>
         <div class="ticket-prize" id="resultPrize">メダル10枚</div>
         <div class="ticket-valid">
-          <span>本日限り有効</span>
+          <span id="validLabel">本日限り有効</span>
           <strong id="expiryLabel">23:59まで</strong>
         </div>
         <div class="ticket-live">
@@ -118,7 +123,7 @@
         <div class="ticket-id" id="claimLabel">ID: --------</div>
       </div>
 
-      <div class="staff-box">
+      <div class="staff-box" id="staffBox">
         <div>
           <strong>スタッフ確認用</strong>
           <p>ご利用時にこの画面をスタッフへお見せください。</p>
@@ -126,7 +131,8 @@
         <button class="redeem-button" id="redeemButton" type="button">スタッフ確認後に使用する</button>
       </div>
 
-      <p class="fine-print">※「使用する」を押すと元に戻せません。必ずスタッフ確認後に操作してください。</p>
+      <p class="fine-print" id="resultFinePrint">※「使用する」を押すと元に戻せません。必ずスタッフ確認後に操作してください。</p>
+      <p class="lose-note" id="loseNote" hidden>今回はハズレでした。また明日チャレンジしてね！</p>
     </section>
 
     <section id="doneView" class="view" hidden>
@@ -136,7 +142,7 @@
         <p>ご利用ありがとうございました！<br>また明日、ルーレットに挑戦してね。</p>
         <div class="done-tekuma-wrap">
           <div class="done-speech">またね！</div>
-          <img class="done-tekuma-peek" src="./assets/done-tekuma-peek.webp?v=8" alt="テクマくん" loading="lazy" decoding="async">
+          <img class="done-tekuma-peek" src="./assets/done-tekuma-peek.webp?v=9" alt="テクマくん" loading="lazy" decoding="async">
         </div>
       </div>
     </section>
@@ -171,8 +177,8 @@
   </main>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="./js/config.js?v=8"></script>
-  <script src="./js/api.js?v=8"></script>
-  <script src="./js/app.js?v=8"></script>
+  <script src="./js/config.js?v=9"></script>
+  <script src="./js/api.js?v=9"></script>
+  <script src="./js/app.js?v=9"></script>
 </body>
 </html>

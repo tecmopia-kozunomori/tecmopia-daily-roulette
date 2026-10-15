@@ -20,20 +20,23 @@
   const segmentData = [
     { id: 'medal10', short: '10枚', icon: '🪙' },
     { id: 'extra1', short: '+1PLAY', icon: '➕' },
-    { id: 'medal10', short: '10枚', icon: '🪙' },
+    { id: 'lose', short: 'ハズレ', icon: '💧' },
     { id: 'free1', short: '1PLAY無料', icon: '🎟️' },
     { id: 'medal10', short: '10枚', icon: '🪙' },
     { id: 'extra1', short: '+1PLAY', icon: '➕' },
-    { id: 'medal10', short: '10枚', icon: '🪙' },
+    { id: 'lose', short: 'ハズレ', icon: '💧' },
     { id: 'free1', short: '1PLAY無料', icon: '🎟️' },
+    { id: 'medal10', short: '10枚', icon: '🪙' },
     { id: 'extra1', short: '+1PLAY', icon: '➕' },
-    { id: 'medal10', short: '10枚', icon: '🪙' }
+    { id: 'lose', short: 'ハズレ', icon: '💧' },
+    { id: 'free1', short: '1PLAY無料', icon: '🎟️' }
   ];
 
   const prizeUi = {
-    medal10: { icon: '🪙', defaultName: 'メダル10枚', thumb: './assets/prize-medal10.webp?v=8' },
-    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料', thumb: './assets/prize-free1.webp?v=8' },
-    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量', thumb: './assets/prize-extra1.webp?v=8' }
+    medal10: { icon: '🪙', defaultName: 'メダル10枚', thumb: './assets/prize-medal10.webp?v=9' },
+    free1: { icon: '🎟️', defaultName: 'クレーンゲーム 1PLAY無料', thumb: './assets/prize-free1.webp?v=9' },
+    extra1: { icon: '➕', defaultName: 'クレーンゲーム 1PLAY増量', thumb: './assets/prize-extra1.webp?v=9' },
+    lose: { icon: '💧', defaultName: 'ハズレ', thumb: './assets/prize-lose.webp?v=9', isLose: true }
   };
 
   function showView(id) {
@@ -212,16 +215,28 @@
   function showResult(data, animate = false) {
     const prize = data.prize || {};
     const ui = prizeUi[prize.id] || { icon: '🎁', defaultName: prize.name || '特典' };
-    activeClaim = data.claimId;
+    const isLose = !!ui.isLose;
+    activeClaim = isLose ? null : data.claimId;
     $('resultIcon').textContent = ui.icon;
     $('resultPrize').textContent = prize.name || ui.defaultName;
-    $('resultThumb').src = ui.thumb || './assets/prize-medal10.webp?v=8';
+    $('resultThumb').src = ui.thumb || './assets/prize-medal10.webp?v=9';
     $('resultThumb').alt = prize.name || ui.defaultName;
-    $('claimLabel').textContent = `ID: ${(data.claimId || '--------').slice(0, 12)}`;
-    $('expiryLabel').textContent = `${formatToday()} 23:59まで`;
+    $('claimLabel').textContent = isLose ? 'ID: --------' : `ID: ${(data.claimId || '--------').slice(0, 12)}`;
+    $('validLabel').textContent = isLose ? 'RESULT' : '本日限り有効';
+    $('expiryLabel').textContent = isLose ? 'また明日チャレンジ！' : `${formatToday()} 23:59まで`;
+    $('resultKicker').textContent = isLose ? '💧 ざんねん… 💧' : '🎉 おめでとう！ 🎉';
+    $('resultTitle').textContent = isLose ? '今回の結果は…' : '本日の当たりは…';
+    $('staffBox').hidden = isLose;
+    $('resultFinePrint').hidden = isLose;
+    $('loseNote').hidden = !isLose;
     showView('resultView');
-    startClock();
-    if (animate) {
+    if (isLose) {
+      clearInterval(clockTimer);
+      $('liveClock').textContent = '--:--:--';
+    } else {
+      startClock();
+    }
+    if (animate && !isLose) {
       confetti();
       playWinSound();
       $('ticket').classList.add('ticket-pop');

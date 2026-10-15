@@ -9,7 +9,7 @@
       this.demo = config.FORCE_DEMO === true || (config.FORCE_DEMO !== false && missing);
       this.idToken = null;
       this.profile = null;
-      this.demoKey = 'tekma_daily_roulette_demo_v1';
+      this.demoKey = 'tekma_daily_roulette_demo_v2';
     }
 
     async init() {
@@ -150,12 +150,13 @@
       const current = await this.demoStatus();
       if (current.state !== 'available') return current;
 
-      const roll = Math.random() * 100;
-      const prize = roll < 50
-        ? { id: 'medal10', name: 'メダル10枚' }
-        : roll < 70
-          ? { id: 'free1', name: 'クレーンゲーム 1PLAY無料' }
-          : { id: 'extra1', name: 'クレーンゲーム 1PLAY増量' };
+      const prizes = [
+        { id: 'medal10', name: 'メダル10枚' },
+        { id: 'free1', name: 'クレーンゲーム 1PLAY無料' },
+        { id: 'extra1', name: 'クレーンゲーム 1PLAY増量' },
+        { id: 'lose', name: 'ハズレ' }
+      ];
+      const prize = prizes[Math.floor(Math.random() * prizes.length)];
 
       const claimId = (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`).slice(0, 8).toUpperCase();
       const rec = {

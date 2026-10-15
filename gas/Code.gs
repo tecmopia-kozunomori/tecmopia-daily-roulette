@@ -1,5 +1,5 @@
 /**
- * テクモピア毎日ルーレット - GAS backend v8 (高速化版)
+ * テクモピア毎日ルーレット - GAS backend v9 (ハズレ追加版)
  *
  * 主な変更:
  * - LINE IDトークン検証結果を短時間キャッシュ
@@ -42,7 +42,7 @@ const FAST = {
 };
 
 function doGet() {
-  return json_({ ok: true, service: 'tecmopia-daily-roulette', version: 8 });
+  return json_({ ok: true, service: 'tecmopia-daily-roulette', version: 9 });
 }
 
 function doPost(e) {
@@ -81,15 +81,7 @@ function setup() {
 
   let prizes = ss.getSheetByName(CONFIG.PRIZE_SHEET);
   if (!prizes) prizes = ss.insertSheet(CONFIG.PRIZE_SHEET);
-  if (prizes.getLastRow() === 0) {
-    prizes.getRange(1, 1, 4, 4).setValues([
-      ['id', 'name', 'weight', 'enabled'],
-      ['medal10', 'メダル10枚', 50, true],
-      ['free1', 'クレーンゲーム 1PLAY無料', 20, true],
-      ['extra1', 'クレーンゲーム 1PLAY増量', 30, true]
-    ]);
-    prizes.setFrozenRows(1);
-  }
+  ensurePrizeSheetDefaults_(prizes);
 
   log.autoResizeColumns(1, LOG_HEADERS.length);
   prizes.autoResizeColumns(1, 4);
@@ -98,12 +90,58 @@ function setup() {
     props.setProperty(FAST.ACTIVATION_DATE_KEY, today_());
   }
   refreshPrizeConfig();
-  return 'セットアップ完了（v8高速化）';
+  return 'セットアップ完了（v9ハズレ追加版）';
+}
+
+
+function ensurePrizeSheetDefaults_(sheet) {
+  const defaults = [
+    ['id', 'name', 'weight', 'enabled'],
+    ['medal10', 'メダル10枚', 25, true],
+    ['free1', 'クレーンゲーム 1PLAY無料', 25, true],
+    ['extra1', 'クレーンゲーム 1PLAY増量', 25, true],
+    ['lose', 'ハズレ', 25, true]
+  ];
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, defaults.length, 4).setValues(defaults);
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  const values = sheet.getDataRange().getValues();
+  if (!values.length) {
+    sheet.getRange(1, 1, defaults.length, 4).setValues(defaults);
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  if (String(values[0][0]).trim() !== 'id') {
+    sheet.insertRows(1, 1);
+    sheet.getRange(1, 1, 1, 4).setValues([defaults[0]]);
+  }
+
+  const idToRow = {};
+  const last = sheet.getLastRow();
+  if (last >= 2) {
+    const rows = sheet.getRange(2, 1, last - 1, 4).getValues();
+    rows.forEach((r, i) => { if (String(r[0]).trim()) idToRow[String(r[0]).trim()] = i + 2; });
+  }
+
+  defaults.slice(1).forEach(def => {
+    const row = idToRow[def[0]];
+    if (row) {
+      sheet.getRange(row, 1, 1, 4).setValues([[def[0], def[1], 25, true]]);
+    } else {
+      sheet.appendRow([def[0], def[1], 25, true]);
+    }
+  });
 }
 
 /** 景品確率をPRIZESシートから高速ストアへ反映。確率変更後に実行してください。 */
 function refreshPrizeConfig() {
   const sheet = getPrizeSheet_();
+  ensurePrizeSheetDefaults_(sheet);
   const last = sheet.getLastRow();
   if (last < 2) throw new Error('景品設定がありません。');
 
