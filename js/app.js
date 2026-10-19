@@ -7,6 +7,8 @@
   const $ = (id) => document.getElementById(id);
   const views = ['loadingView', 'wheelView', 'resultView', 'doneView', 'errorView'];
   const wheel = $('wheel');
+  const wheelStage = $('wheelStage');
+  const flickGuide = $('flickGuide');
   const spinButton = $('spinButton');
   const redeemButton = $('redeemButton');
   const confirmModal = $('confirmModal');
@@ -16,6 +18,7 @@
   let clockTimer = null;
   let loadingTimer = null;
   let pendingSpin = null;
+  let dragState = null;
 
   const segmentData = [
     { id: 'medal10', short: '10枚', icon: '🪙' },
@@ -161,21 +164,32 @@
     } catch (_) {}
   }
 
-  function spinTo(prizeId) {
+  function spinTo(prizeId, direction = 1, launchSpeed = 650) {
     const index = selectedIndexFor(prizeId);
     const segmentAngle = 360 / segmentData.length;
     const center = index * segmentAngle + segmentAngle / 2;
     const current = normalizeDeg(currentRotation);
     const targetMod = normalizeDeg(-center);
-    const delta = normalizeDeg(targetMod - current);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const turns = reduceMotion ? 1 : 4;
-    const duration = reduceMotion ? 800 : 3200;
 
-    currentRotation += turns * 360 + delta;
+    const dir = direction < 0 ? -1 : 1;
+    const speedFactor = Math.max(0, Math.min(1, (Math.abs(launchSpeed) - 220) / 850));
+    const turns = reduceMotion ? 1 : 3 + Math.round(speedFactor * 3);
+    const duration = reduceMotion ? 800 : 2600 + Math.round(speedFactor * 900);
+
+    let travel;
+    if (dir > 0) {
+      travel = turns * 360 + normalizeDeg(targetMod - current);
+    } else {
+      travel = -(turns * 360 + normalizeDeg(current - targetMod));
+    }
+
+    currentRotation += travel;
+    wheel.style.transitionTimingFunction = 'cubic-bezier(.10,.62,.08,1)';
     wheel.style.transitionDuration = `${duration}ms`;
     wheel.style.transform = `rotate(${currentRotation}deg)`;
     playSpinSound(duration);
+
     return new Promise(resolve => {
       setTimeout(() => {
         setLabelsUpright(currentRotation);
@@ -184,27 +198,29 @@
     });
   }
 
-  function startPendingSpin() {
+  function startPendingSpin(direction = 1, launchSpeed = 650) {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion || !wheel.animate) return null;
 
+    const dir = direction < 0 ? -1 : 1;
+    const degPerSecond = Math.max(420, Math.min(1050, Math.abs(launchSpeed)));
+    const duration = 360000 / degPerSecond;
     const baseRotation = currentRotation;
-    const duration = 680;
     const startedAt = performance.now();
     const animation = wheel.animate(
       [
         { transform: `rotate(${baseRotation}deg)` },
-        { transform: `rotate(${baseRotation + 360}deg)` }
+        { transform: `rotate(${baseRotation + dir * 360}deg)` }
       ],
       { duration, iterations: Infinity, easing: 'linear' }
     );
-    return { animation, baseRotation, duration, startedAt };
+    return { animation, baseRotation, duration, startedAt, direction: dir };
   }
 
   function stopPendingSpin(pending) {
     if (!pending) return;
     const elapsed = Math.max(0, performance.now() - pending.startedAt);
-    currentRotation = pending.baseRotation + (elapsed / pending.duration) * 360;
+    currentRotation = pending.baseRotation + (elapsed / pending.duration) * 360 * pending.direction;
     pending.animation.cancel();
     wheel.style.transitionDuration = '0ms';
     wheel.style.transform = `rotate(${currentRotation}deg)`;
@@ -275,17 +291,21 @@
     clockTimer = setInterval(tick, 1000);
   }
 
-  async function onSpin() {
-    if (spinning) return;
+  async function runSpin(direction = 1, launchSpeed = 650) {
+    if (spinning || spinButton.disabled) return;
     spinning = true;
     spinButton.disabled = true;
-    spinButton.classList.add('is-spinning');
-    spinButton.querySelector('.spin-small').textContent = 'ルーレット回転中…';
-    spinButton.querySelector('.spin-main').textContent = 'GO!';
+    wheelStage.classList.remove('is-dragging');
+    wheelStage.classList.add('is-spinning');
+    flickGuide.classList.add('is-spinning');
+    $('flickGuideTitle').textContent = 'ルーレット回転中！';
+    $('flickGuideText').textContent = '結果が決まるまでそのまま待ってね';
+    spinButton.querySelector('.spin-small').textContent = '抽選中…';
+    spinButton.querySelector('.spin-main').textContent = '回転中';
 
     try {
-      // 通信を待っている間も即座にルーレットを回し、無反応に見せない。
-      pendingSpin = startPendingSpin();
+      // はじいた直後から回転し、GASの返答待ちを見せない。
+      pendingSpin = startPendingSpin(direction, launchSpeed);
       const result = await api.spin();
       stopPendingSpin(pendingSpin);
       pendingSpin = null;
@@ -297,7 +317,8 @@
       if (result.state !== 'won' || !result.prize) {
         throw new Error('抽選結果を取得できませんでした。');
       }
-      await spinTo(result.prize.id);
+
+      await spinTo(result.prize.id, direction, launchSpeed);
       showResult(result, true);
     } catch (err) {
       stopPendingSpin(pendingSpin);
@@ -305,9 +326,138 @@
       showError(err);
     } finally {
       spinning = false;
-      spinButton.classList.remove('is-spinning');
-      spinButton.querySelector('.spin-small').textContent = '今日の運だめし！';
-      spinButton.querySelector('.spin-main').textContent = 'START!';
+      wheelStage.classList.remove('is-spinning');
+      flickGuide.classList.remove('is-spinning');
+      $('flickGuideTitle').textContent = 'ルーレットを指ではじいて！';
+      $('flickGuideText').textContent = '円をなぞって、勢いよくパッと離してね';
+      spinButton.querySelector('.spin-small').textContent = 'うまく回せない場合';
+      spinButton.querySelector('.spin-main').textContent = 'タップでも回す';
+    }
+  }
+
+  function onSpin() {
+    runSpin(1, 650);
+  }
+
+  function pointerAngle(event) {
+    const rect = wheel.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    return Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+  }
+
+  function pointerRadius(event) {
+    const rect = wheel.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    return Math.hypot(event.clientX - cx, event.clientY - cy);
+  }
+
+  function onWheelPointerDown(event) {
+    if (spinning || spinButton.disabled || event.button > 0) return;
+
+    const radius = pointerRadius(event);
+    if (radius < wheel.clientWidth * 0.13) return;
+
+    wheelStage.setPointerCapture(event.pointerId);
+    wheelStage.classList.add('is-dragging');
+    wheel.style.transitionDuration = '0ms';
+
+    dragState = {
+      pointerId: event.pointerId,
+      startRotation: currentRotation,
+      startTime: performance.now(),
+      lastTime: performance.now(),
+      lastAngle: pointerAngle(event),
+      velocity: 0,
+      travel: 0
+    };
+  }
+
+  function onWheelPointerMove(event) {
+    if (!dragState || event.pointerId !== dragState.pointerId || spinning) return;
+
+    const now = performance.now();
+    const angle = pointerAngle(event);
+    const delta = signedDeg(angle - dragState.lastAngle);
+    const dt = Math.max(8, now - dragState.lastTime);
+
+    // 中心付近や異常なジャンプは無視して、端末ごとのPointer差を吸収。
+    if (Math.abs(delta) < 75) {
+      currentRotation += delta;
+      dragState.travel += Math.abs(delta);
+      const sampleVelocity = delta / dt; // deg/ms
+      dragState.velocity = dragState.velocity * 0.55 + sampleVelocity * 0.45;
+      wheel.style.transform = `rotate(${currentRotation}deg)`;
+    }
+
+    dragState.lastAngle = angle;
+    dragState.lastTime = now;
+  }
+
+  function restoreWeakFlick(state) {
+    wheel.style.transitionTimingFunction = 'ease-out';
+    wheel.style.transitionDuration = '220ms';
+    currentRotation = state.startRotation;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
+    setTimeout(() => {
+      setLabelsUpright(currentRotation);
+      wheel.style.transitionDuration = '0ms';
+    }, 230);
+
+    flickGuide.classList.remove('nudge');
+    void flickGuide.offsetWidth;
+    flickGuide.classList.add('nudge');
+    $('flickGuideTitle').textContent = 'もう少し勢いよく！';
+    $('flickGuideText').textContent = '円周に沿ってサッとはじいてみてね';
+    setTimeout(() => {
+      if (!spinning) {
+        $('flickGuideTitle').textContent = 'ルーレットを指ではじいて！';
+        $('flickGuideText').textContent = '円をなぞって、勢いよくパッと離してね';
+      }
+    }, 1300);
+  }
+
+  function finishWheelPointer(event, cancelled = false) {
+    if (!dragState || event.pointerId !== dragState.pointerId) return;
+
+    const state = dragState;
+    dragState = null;
+    wheelStage.classList.remove('is-dragging');
+
+    try {
+      if (wheelStage.hasPointerCapture(event.pointerId)) {
+        wheelStage.releasePointerCapture(event.pointerId);
+      }
+    } catch (_) {}
+
+    if (cancelled || spinning) {
+      restoreWeakFlick(state);
+      return;
+    }
+
+    const elapsed = Math.max(1, performance.now() - state.startTime);
+    const averageSpeed = Math.abs(currentRotation - state.startRotation) / elapsed * 1000;
+    const releaseSpeed = Math.abs(state.velocity) * 1000;
+    const launchSpeed = Math.max(averageSpeed, releaseSpeed);
+    const deltaRotation = currentRotation - state.startRotation;
+    const direction = Math.sign(state.velocity || deltaRotation) || 1;
+
+    // 小さな触れ・誤操作では1日1回の抽選を消費しない。
+    const strongEnough = state.travel >= 18 && launchSpeed >= 115;
+    if (!strongEnough) {
+      restoreWeakFlick(state);
+      return;
+    }
+
+    runSpin(direction, Math.max(380, Math.min(1100, launchSpeed)));
+  }
+
+  function onWheelKeyDown(event) {
+    if (spinning || spinButton.disabled) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      runSpin(1, 650);
     }
   }
 
@@ -406,6 +556,12 @@
   window.addEventListener('orientationchange', () => {
     setTimeout(layoutSegments, 120);
   });
+
+  wheelStage.addEventListener('pointerdown', onWheelPointerDown);
+  wheelStage.addEventListener('pointermove', onWheelPointerMove);
+  wheelStage.addEventListener('pointerup', (event) => finishWheelPointer(event, false));
+  wheelStage.addEventListener('pointercancel', (event) => finishWheelPointer(event, true));
+  wheelStage.addEventListener('keydown', onWheelKeyDown);
 
   spinButton.addEventListener('click', onSpin);
   redeemButton.addEventListener('click', openConfirm);
